@@ -1,8 +1,23 @@
 class TicTacToe(object):
+    '''
+    Tic Tac Toe environment
+    
+    Usable Variables:
+    self.board contains all the information on the board at the moment (-1 unplayed space, 0 move by player 1, 1 move by player 2)
+    self.action_space contains all legal moves at the point of calling
+    self.turn alternates between 0 and 1 indicating current player
+
+    Usage example:
+    ```
+    env = TicTacToe()
+    action = 1
+    
+    ```
+    '''
     def __init__(self):
         self.reset()
 
-    def step(self, action):
+    def step(self, action, info=False):
         self.board[action] = self.turn
         self.change_player()
         self.action_space.remove(action)
@@ -11,10 +26,11 @@ class TicTacToe(object):
             reward = -1
         else:
             reward = 10
-            if winner == -1:
-                print('Draw')
-            else:
-                print(f'Winner: Player {winner+1}')
+            if info:
+                if winner == -1:
+                    print('Draw')
+                else:
+                    print(f'Winner: Player {winner+1}')
         return self.board, reward, done
 
     def change_player(self):
@@ -47,7 +63,7 @@ class TicTacToe(object):
     def reset(self):
         self.board = [-1] * 9
         self.turn = 0
-        self.action_space = [x for x in range(0,9)]
+        self.action_space = [x for x in range(0, 9)]
 
     def render(self):
         board = '-------\n|'
@@ -58,7 +74,7 @@ class TicTacToe(object):
                 board += 'O|'
             else:
                 board += 'X|'
-            if (i+1)%3 == 0:
+            if (i+1) % 3 == 0:
                 board += '\n-------\n|'
         print(board[:-1])
 
@@ -70,7 +86,7 @@ class TicTacToe(object):
                 action = int(input(f'Enter move: {self.action_space}\n'))
                 if action in self.action_space:
                     valid_input = True
-                    _, _, done = self.step(action)
+                    _, _, done = self.step(action, info=True)
                     self.render()
                 else:
                     print('Invalid Move')
