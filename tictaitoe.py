@@ -1,4 +1,7 @@
-class TicTacToe(object):
+import random
+
+
+class TicTaiToe(object):
     '''
     Tic Tac Toe environment
     
@@ -7,39 +10,95 @@ class TicTacToe(object):
     self.action_space contains all legal moves at the point of calling
     self.turn alternates between 0 and 1 indicating current player
 
+    Usable functions:
+    reset() to reset the board
+    get_observation() to get current observation in the form [*board_info, player_turn]
+    step(action) to advance environment in direction of action
+    sample_action() gets a random move from action_space. Not recommended
+    play() lets you play the game alone (if you have a sad life) or with a friend
+
     Usage example:
     ```
     env = TicTacToe()
-    action = 1
+    observation = env.reset()
+    for _ in range(1000):
+        env.render()
+        action = env.sample_action()
+        observation, reward, done, info = env.step(action)
+
+        if done:
+            observation = env.reset()
     
     ```
     '''
     def __init__(self):
+        '''
+        Calls reset to restart environment
+        '''
         self.reset()
 
+    def reset(self):
+        '''
+        Resets the environment and returns the initial observation, observation in the form [*board_info, player_turn]
+        '''
+        self.board = [-1] * 9
+        self.turn = 0
+        self.action_space = [x for x in range(0, 9)]
+        return self.get_observation()
+
+    def get_observation(self):
+        '''
+        Return observation in the form [*board_info, player_turn]
+        '''
+        return [*self.board, self.turn]
+
     def step(self, action, info=False):
+        '''
+        Advance environment by a step in the direction of action given
+        Returns observation, reward, done, winner
+        
+        winner is in the form of -1, 0, 1 with -1 indicating no winner, 0 being player 1, 1 being player 2
+        '''
+        if self.board[action] != -1:
+            reward = -5
+            done, winner = self.game_complete()
+            return self.get_observation(), reward, done, winner
         self.board[action] = self.turn
         self.change_player()
-        self.action_space.remove(action)
         done, winner = self.game_complete()
         if not done:
             reward = -1
         else:
-            reward = 10
-            if info:
-                if winner == -1:
+            if winner == -1:
+                reward = 0
+                if info:
                     print('Draw')
-                else:
+            else:
+                reward = 10
+                if info:
                     print(f'Winner: Player {winner+1}')
-        return self.board, reward, done
+
+        return self.get_observation(), reward, done, winner
+
+    def sample_action(self):
+        '''
+        Randomly samples an action from the action space. Not recommended. Recommended to sample action_space as required (e.g. EPS Greedy)
+        '''
+        return random.choice(self.action_space)
 
     def change_player(self):
+        '''
+        Backend mechanism to swap turns
+        '''
         if self.turn == 0:
             self.turn = 1
         else:
             self.turn = 0
 
     def game_complete(self):
+        '''
+        Backend mechanism to check if game is completed and if it is, who won
+        '''
         if self.board[0] != -1:
             if (self.board[0] == self.board[1] and self.board[0] == self.board[2]) or (self.board[0] == self.board[3] and self.board[0] == self.board[6]) or (self.board[0] == self.board[4] and self.board[0] == self.board[8]):
                 return True, self.board[0]
@@ -60,12 +119,11 @@ class TicTacToe(object):
         else:
             return False, -1
 
-    def reset(self):
-        self.board = [-1] * 9
-        self.turn = 0
-        self.action_space = [x for x in range(0, 9)]
-
     def render(self):
+        '''
+        Renders the board in print form. Not recommended on training as it will flood the console
+        Looking to upgrade this to an external visualisation
+        '''
         board = '-------\n|'
         for i in range(len(self.board)):
             if self.board[i] == -1:
@@ -79,6 +137,9 @@ class TicTacToe(object):
         print(board[:-1])
 
     def play(self):
+        '''
+        Player vs player mode, mostly to test if the works
+        '''
         done = False
         while not done:
             valid_input = False
@@ -86,7 +147,7 @@ class TicTacToe(object):
                 action = int(input(f'Enter move: {self.action_space}\n'))
                 if action in self.action_space:
                     valid_input = True
-                    _, _, done = self.step(action, info=True)
+                    _, _, done, _ = self.step(action, info=True)
                     self.render()
                 else:
                     print('Invalid Move')
