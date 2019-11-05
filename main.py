@@ -1,4 +1,4 @@
-from tictactoe import TicTacToe
+from tictaitoe import TicTacToe
 '''
 To play the game without an AI
 '''

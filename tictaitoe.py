@@ -1,7 +1,7 @@
 import random
 
 
-class TicTacToe(object):
+class TicTaiToe(object):
     '''
     Tic Tac Toe environment
     
